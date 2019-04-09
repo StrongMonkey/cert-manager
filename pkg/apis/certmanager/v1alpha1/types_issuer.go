@@ -423,6 +423,8 @@ type ACMEIssuerDNS01Provider struct {
 
 	// +optional
 	Webhook *ACMEIssuerDNS01ProviderWebhook `json:"webhook,omitempty"`
+
+	RDNS       *ACMEIssuerDNS01ProviderRDNS       `json:"rdns,omitempty"`
 }
 
 //// END OLD TYPES
@@ -564,6 +566,7 @@ type ACMEIssuerDNS01ProviderRFC2136 struct {
 	TSIGAlgorithm string `json:"tsigAlgorithm,omitempty"`
 }
 
+<<<<<<< HEAD
 // ACMEIssuerDNS01ProviderWebhook specifies configuration for a webhook DNS01
 // provider, including where to POST ChallengePayload resources.
 type ACMEIssuerDNS01ProviderWebhook struct {
@@ -588,6 +591,13 @@ type ACMEIssuerDNS01ProviderWebhook struct {
 	// implementation's documentation.
 	// +optional
 	Config *apiext.JSON `json:"config,omitempty"`
+=======
+
+// ACMEIssuerDNS01ProviderRDNS is a structure containing rancher dns config
+type ACMEIssuerDNS01ProviderRDNS struct {
+	APIEndpoint string            `json:"apiEndpoint"`
+	ClientToken SecretKeySelector `json:"clientTokenSecretRef"`
+>>>>>>> 83a04d95b... add rdns dns provider, adopt for istio
 }
 
 // IssuerStatus contains status information about an Issuer

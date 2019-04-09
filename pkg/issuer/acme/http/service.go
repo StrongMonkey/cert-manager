@@ -19,6 +19,7 @@ package http
 import (
 	"context"
 	"fmt"
+	"hash/adler32"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -103,11 +104,12 @@ func buildService(issuer v1alpha1.GenericIssuer, ch *v1alpha1.Challenge) (*corev
 	podLabels := podLabels(ch)
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "cm-acme-http-solver-",
-			Namespace:    ch.Namespace,
-			Labels:       podLabels,
+			Name:      fmt.Sprintf("cm-acme-http-solver-%d", adler32.Checksum([]byte(ch.Spec.DNSName))),
+			Namespace: ch.Namespace,
+			Labels:    podLabels,
 			Annotations: map[string]string{
 				"auth.istio.io/8089": "NONE",
+				"acme.domain":        ch.Spec.DNSName,
 			},
 			OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(ch, challengeGvk)},
 		},
@@ -125,13 +127,7 @@ func buildService(issuer v1alpha1.GenericIssuer, ch *v1alpha1.Challenge) (*corev
 	}
 
 	// checking for presence of http01 config and if set serviceType is set, override our default (NodePort)
-	httpDomainCfg, err := httpDomainCfgForChallenge(issuer, ch)
-	if err != nil {
-		return nil, err
-	}
-	if httpDomainCfg.ServiceType != "" {
-		service.Spec.Type = httpDomainCfg.ServiceType
-	}
+	service.Spec.Type = corev1.ServiceTypeClusterIP
 
 	return service, nil
 }
